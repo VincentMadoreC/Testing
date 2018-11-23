@@ -1,4 +1,4 @@
-package ScheduleManager;
+package com.example.vincent.testing.ScheduleManager;
 
 public enum State {
     AVAILABLE,

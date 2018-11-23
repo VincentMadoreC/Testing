@@ -1,4 +1,4 @@
-package ScheduleManager;
+package com.example.vincent.testing.ScheduleManager;
 
 public class DailySchedule {
 
@@ -11,10 +11,9 @@ public class DailySchedule {
     private TimeNode head;
     private int size;
 
-
     /**
      * Empty constructor
-     * Used when merging a ScheduleManager.DailySchedule with a TimeSlot and building a new ScheduleManager.DailySchedule from 0.
+     * Used when merging a com.example.vincent.testing.ScheduleManager.DailySchedule with a TimeSlot and building a new com.example.vincent.testing.ScheduleManager.DailySchedule from 0.
      */
     public DailySchedule() {
         head = new TimeNode(0, null, null);
@@ -25,7 +24,7 @@ public class DailySchedule {
     /**
      * Constructor
      * Creates a 4-nodes schedule using the 2 nodes from the DefaultSchedule and adding 2 extreme nodes.
-     * Used to create the starting point to build the final ScheduleManager.DailySchedule.
+     * Used to create the starting point to build the final com.example.vincent.testing.ScheduleManager.DailySchedule.
      * @param startTime
      * @param endTime
      * @param state
@@ -37,17 +36,15 @@ public class DailySchedule {
         TimeNode node3 = new TimeNode(endTime, null, State.UNAVAILABLE); // set next after initialization of node4
         TimeNode node4 = new TimeNode(1440, null, null);
 
-        head.next = node1;
-        node1.next = node2;
-        node2.next = node3;
-        node3.next = node4;
+        head.setNext(node1);
+        node1.setNext(node2);
+        node2.setNext(node3);
+        node3.setNext(node4);
 
         size = 4;
     }
 
-    public int getSize() {
-        return size;
-    }
+
 
 //	public void add(TimeNode timeNode) {
 //		head.next = timeNode;
@@ -72,11 +69,11 @@ public class DailySchedule {
 
     public void append(TimeNode newTimeNode) {
         TimeNode last = this.head;
-        while (last.next != null) { // get to the end of the chain
-            last = last.next;
+        while (last.getNext() != null) { // get to the end of the chain
+            last = last.getNext();
         }
-        last.next = newTimeNode;
-        newTimeNode.next = null;
+        last.setNext(newTimeNode);
+        newTimeNode.setNext(null);
     }
 
 
@@ -113,7 +110,7 @@ public class DailySchedule {
 
 
 //	/**
-//	 * Get the first TimeNode of the ScheduleManager.DailySchedule.
+//	 * Get the first TimeNode of the com.example.vincent.testing.ScheduleManager.DailySchedule.
 //	 * @return
 //	 */
 //	public TimeNode getFirst() {
@@ -121,34 +118,34 @@ public class DailySchedule {
 //	}
 
     /**
-     * Get the last TimeNode of the ScheduleManager.DailySchedule.
+     * Get the last TimeNode of the com.example.vincent.testing.ScheduleManager.DailySchedule.
      * @return
      */
     public TimeNode getLast() {
         TimeNode last = head;
-        while (last.next != null) {
-            last = last.next;
+        while (last.getNext() != null) {
+            last = last.getNext();
         }
         return last;
     }
 
     public TimeNode extractFirst() {
-        if (this.head.next == null) {
+        if (this.head.getNext() == null) {
             return null;
         } else {
-            TimeNode first = this.head.next;
-            this.head.next = first.next;
-            first.next = null;
+            TimeNode first = this.head.getNext();
+            this.head.setNext(first.getNext());
+            first.setNext(null);
             return first;
         }
     }
 
     public DailySchedule merge(TimeSlot timeSlot) {
-        // Initialize a blank ScheduleManager.DailySchedule.
+        // Initialize a blank DailySchedule.
         DailySchedule newDS = new DailySchedule();
 
         // Append all the TimeNodes that are earlier than the startNode of the TimeSlot.
-        while (this.head.next.time < timeSlot.getStartNode().time) {
+        while (this.head.getNext().getTime() < timeSlot.getStartTime()) {
 //			TimeNode first = this.extractFirst();
 //			newDS.append(first);
             newDS.append(this.extractFirst());
@@ -159,9 +156,9 @@ public class DailySchedule {
 //			newDS.getLast().next =
         }
 
-        // If a ScheduleManager.DailySchedule's TimeNode and a TimeSlot's TimeNode have the same time, the TimeSlot has priority
-        if (timeSlot.getStartNode().time == this.head.next.time) {
-            // Append the timeSlot's startNode and remove the next TimeNode of the current ScheduleManager.DailySchedule.
+        // If a DailySchedule's TimeNode and a TimeSlot's TimeNode have the same time, the TimeSlot has priority
+        if (timeSlot.getStartTime() == this.head.getNext().getTime()) {
+            // Append the timeSlot's startNode and remove the next TimeNode of the current DailySchedule.
             newDS.append(timeSlot.getStartNode());
             this.extractFirst(); // Don't do anything with it, just remove it.
         } else {
@@ -170,20 +167,65 @@ public class DailySchedule {
 
         // Ignore all subsequent TimeNodes that are earlier or equal to the TimeSlot's endTime,
         //	but copy the state of the last ignored node in the endTime TimeNode.
-        TimeNode currentIgnoredNode = this.head.next;
-        while (currentIgnoredNode.time <= timeSlot.getEndNode().time) {
-            timeSlot.getEndNode().state = currentIgnoredNode.state; // Copy the state of the last ignored node.
-            currentIgnoredNode = currentIgnoredNode.next;
+        while (this.head.getNext().getTime() <= timeSlot.getEndTime()) {
+            timeSlot.getEndNode().setState(this.head.getNext().getState()); // Copy the state of the last ignored node.
+            this.extractFirst();
         }
         newDS.append(timeSlot.getEndNode());
 
-        // Append the rest of the TimeNodes of the ScheduleManager.DailySchedule
-        while (this.head.next != null) {
+        // Append the rest of the TimeNodes of the com.example.vincent.testing.ScheduleManager.DailySchedule
+        while (this.head.getNext() != null) {
             newDS.append(this.extractFirst());
         }
 
         newDS.cleanUp();
         return newDS;
+    }
+
+    public boolean isBookedBetween(int startTime, int endTime) {
+        TimeNode currentNode = this.head;
+        if (currentNode.getNext() != null) {
+            currentNode = currentNode.getNext();
+        }
+
+//        // Find the first BOOKED node
+//        while (currentNode.getState() != State.BOOKED) {
+//            if (currentNode.getNext() != null) {
+//                currentNode = currentNode.getNext();
+//            }
+//        }
+
+        // Find the first BOOKED node since the others have no interest.
+        while (currentNode.getNext() != null) {
+            if (currentNode.getState() == State.BOOKED) {
+                break;
+            }
+            currentNode = currentNode.getNext();
+        }
+        // Check if there is any overlap between the specified time slot and a BOOKED state.
+        while (currentNode.getNext() != null) {
+            if (currentNode.getState() == State.BOOKED) {
+                if (((currentNode.getTime() >= startTime) // The currentNode is between startTime
+                        && (currentNode.getTime() < endTime)) // and endTime, or
+                        || ((currentNode.getTime() < startTime) // startTime is between the 2 nodes
+                        && (currentNode.getNext().getTime() > startTime))) {
+                    return  true;
+                }
+            }
+            currentNode = currentNode.getNext();
+        }
+//        while (currentNode.getTime() < endTime) {
+//            if (currentNode.getState() == State.BOOKED) {
+//                if (currentNode.getTime() >= startTime) {
+//                    // && (currentNode.getTime() < endTime)
+//                    return true;
+//                }
+//            }
+//            if (currentNode.getNext() != null) {
+//                currentNode = currentNode.getNext();
+//            }
+//        }
+        return false;
     }
 
 //	/**
@@ -207,14 +249,14 @@ public class DailySchedule {
 
     public DailySchedule cleanUp() {
         TimeNode currentNode = this.head;
-        TimeNode nextNode = currentNode.next;
+        TimeNode nextNode = currentNode.getNext();
         while (nextNode != null) {
-            if (currentNode.state == nextNode.state) {
+            if (currentNode.getState() == nextNode.getState()) {
                 currentNode.removeNext();
-                nextNode = currentNode.next;
+                nextNode = currentNode.getNext();
             } else {
                 currentNode = nextNode;
-                nextNode = nextNode.next;
+                nextNode = nextNode.getNext();
             }
         }
         return this;
@@ -348,12 +390,16 @@ public class DailySchedule {
 //
 //	  }
 
+    public int getSize() {
+        return this.size;
+    }
+
     public String toString() {
-        TimeNode timeNode = this.head.next;
+        TimeNode timeNode = this.head.getNext();
         String schedule = "Schedule's size: " + this.size + "\n";
         while (timeNode != null) {
             schedule = schedule + timeNode.toString();
-            timeNode = timeNode.next;
+            timeNode = timeNode.getNext();
         }
         return schedule;
     }
