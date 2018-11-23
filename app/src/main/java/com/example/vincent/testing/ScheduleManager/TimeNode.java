@@ -1,4 +1,4 @@
-package ScheduleManager;
+package com.example.vincent.testing.ScheduleManager;
 
 public class TimeNode {
     private int time; // the minute of the day (0 - 1440)
@@ -41,8 +41,9 @@ public class TimeNode {
 
     public String toString() {
         String string = "";
-        string = string + "Time: " + this.time
-                + ", \tState: " + this.state + "\n";
+        string = string
+                + "Time: " + this.time + ", \t"
+                + "State: " + this.state + "\n";
         return string;
     }
 
